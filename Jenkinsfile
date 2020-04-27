@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    tools {
-        jdk "openjdk8"
-    }
     options {
         buildDiscarder(logRotator(artifactNumToKeepStr: '5'))
     }
