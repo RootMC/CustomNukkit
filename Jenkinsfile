@@ -1,8 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven "MAVEN_HOME"
-        jdk "JAVA_HOME"
+        jdk "openjdk8"
     }
     options {
         buildDiscarder(logRotator(artifactNumToKeepStr: '5'))
