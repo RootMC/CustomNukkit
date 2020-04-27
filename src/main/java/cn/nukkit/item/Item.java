@@ -439,8 +439,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
             case v1_15_0_56:
                 return new ArrayList<>(Item.creative389);
             default:
-                Server.getInstance().getLogger().alert("Tried to get creative items for unsupported protocol version: " + protocol);
-                return null;
+                throw new IllegalArgumentException("Tried to get creative items for unsupported protocol version: " + protocol);
         }
     }
 
@@ -473,8 +472,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
                 Item.creative389.add(item.clone());
                 break;
             default:
-                Server.getInstance().getLogger().alert("Tried to register creative items for unsupported protocol version: " + protocol);
-                break;
+                throw new IllegalArgumentException("Tried to get creative items for unsupported protocol version: " + protocol);
         }
     }
 

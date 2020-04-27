@@ -98,6 +98,7 @@ import java.util.regex.Pattern;
  * @author Box
  */
 @Log4j2
+
 public class Server {
 
     public static final String BROADCAST_CHANNEL_ADMINISTRATIVE = "nukkit.broadcast.admin";
@@ -2293,7 +2294,7 @@ public class Server {
         this.doNotLimitInteractions = this.getPropertyBoolean("do-not-limit-interactions", false);
         this.motd = this.getPropertyString("motd", "Minecraft Server");
         this.viewDistance = this.getPropertyInt("view-distance", 8);
-        this.despawnTicks = this.getPropertyInt("ticks-per-entity-despawns", 6000);
+        this.despawnTicks = this.getPropertyInt("ticks-per-entity-despawns", 12000);
         this.port = this.getPropertyInt("server-port", 19132);
         this.ip = this.getPropertyString("server-ip", "0.0.0.0");
         this.skinChangeCooldown = this.getPropertyInt("skin-change-cooldown", 30);
@@ -2400,7 +2401,7 @@ public class Server {
             put("chunk-generation-population-queue-size", 8);
             put("ticks-per-autosave", 6000);
             put("ticks-per-entity-spawns", 200);
-            put("ticks-per-entity-despawns", 6000);
+            put("ticks-per-entity-despawns", 12000);
             put("thread-watchdog", true);
             put("thread-watchdog-tick", 50000);
             put("nether", true);
