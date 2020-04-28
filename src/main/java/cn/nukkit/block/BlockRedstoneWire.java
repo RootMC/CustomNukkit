@@ -41,11 +41,7 @@ public class BlockRedstoneWire extends BlockFlowable {
 
     @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
-        if (target.canBeReplaced()) {
-            block = target;
-        }
-
-        if (!canBePlacedOn(block.down())) {
+        if (face != BlockFace.UP || !canBePlacedOn(target)) {
             return false;
         }
 
@@ -208,7 +204,7 @@ public class BlockRedstoneWire extends BlockFlowable {
             return 0;
         }
 
-        if (type == Level.BLOCK_UPDATE_NORMAL && !this.canBePlacedOn(this.down())) {
+        if (type == Level.BLOCK_UPDATE_NORMAL && !this.canBePlacedOn(this.getLocation().down())) {
             this.getLevel().useBreakOn(this);
             return Level.BLOCK_UPDATE_NORMAL;
         }
@@ -218,8 +214,10 @@ public class BlockRedstoneWire extends BlockFlowable {
         return Level.BLOCK_UPDATE_NORMAL;
     }
 
-    public boolean canBePlacedOn(Block b) {
-        return b.isSolid() && (!b.isTransparent() || b.getId() == Block.GLOWSTONE);
+    public boolean canBePlacedOn(Vector3 v) {
+        Block b = this.level.getBlock(v);
+
+        return (b.isSolid() && !b.isTransparent() && b.getId() != GLOWSTONE) || b.getId() == HOPPER_BLOCK;
     }
 
     public int getStrongPower(BlockFace side) {
@@ -280,8 +278,9 @@ public class BlockRedstoneWire extends BlockFlowable {
             BlockFace face = ((BlockRedstoneDiode) block).getFacing();
             return face == side || face.getOpposite() == side;
         } else if (block instanceof BlockPistonBase) {
-//            return ((BlockPistonBase) block).getBlockFace() != side.getOpposite();
-            return true;} else {
+            //return ((BlockPistonBase) block).getBlockFace() != side.getOpposite();
+            return true;
+        } else {
             return block.isPowerSource() && side != null;
         }
     }

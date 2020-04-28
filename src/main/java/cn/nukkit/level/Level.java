@@ -185,10 +185,12 @@ public class Level implements ChunkManager, Metadatable {
 
     private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue0 = new ConcurrentHashMap<>(); // < 1.12
     private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue361 = new ConcurrentHashMap<>(); // 1.12
-    private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue388 = new ConcurrentHashMap<>(); // > 1.12
+    private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue388 = new ConcurrentHashMap<>(); // 1.13
+    private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue389 = new ConcurrentHashMap<>(); // 1.14
     private final LongSet chunkSendTasks0 = new LongOpenHashSet(); // < 1.12
     private final LongSet chunkSendTasks361 = new LongOpenHashSet(); // 1.12
-    private final LongSet chunkSendTasks388 = new LongOpenHashSet(); // > 1.12
+    private final LongSet chunkSendTasks388 = new LongOpenHashSet(); // 1.13
+    private final LongSet chunkSendTasks389 = new LongOpenHashSet(); // 1.14
 
     private final Long2ObjectOpenHashMap<Boolean> chunkPopulationQueue = new Long2ObjectOpenHashMap<>();
     private final Long2ObjectOpenHashMap<Boolean> chunkPopulationLock = new Long2ObjectOpenHashMap<>();
@@ -2804,9 +2806,9 @@ public class Level implements ChunkManager, Metadatable {
             tasks0.remove(index);
         }
 
-        LongSet tasks361 = getChunkSendTasks(361);
+        LongSet tasks361 = getChunkSendTasks(ProtocolInfo.v1_12_0);
         if (tasks361.contains(index)) {
-            ConcurrentMap<Long, Int2ObjectMap<Player>> queue = getChunkSendQueue(361);
+            ConcurrentMap<Long, Int2ObjectMap<Player>> queue = getChunkSendQueue(ProtocolInfo.v1_12_0);
             for (Player player : queue.get(index).values()) {
                 if (player.isConnected() && player.usedChunks.containsKey(index)) {
                     player.sendChunk(x, z, packet);
@@ -2817,9 +2819,9 @@ public class Level implements ChunkManager, Metadatable {
             tasks361.remove(index);
         }
 
-        LongSet tasks388 = getChunkSendTasks(388);
+        LongSet tasks388 = getChunkSendTasks(ProtocolInfo.v1_13_0);
         if (tasks388.contains(index)) {
-            ConcurrentMap<Long, Int2ObjectMap<Player>> queue = getChunkSendQueue(388);
+            ConcurrentMap<Long, Int2ObjectMap<Player>> queue = getChunkSendQueue(ProtocolInfo.v1_13_0);
             for (Player player : queue.get(index).values()) {
                 if (player.isConnected() && player.usedChunks.containsKey(index)) {
                     player.sendChunk(x, z, packet);
@@ -2828,6 +2830,18 @@ public class Level implements ChunkManager, Metadatable {
 
             queue.remove(index);
             tasks388.remove(index);
+        }
+
+        LongSet tasks389 = getChunkSendTasks(ProtocolInfo.v1_14_0);
+        if (tasks389.contains(index)) {
+            ConcurrentMap<Long, Int2ObjectMap<Player>> queue = getChunkSendQueue(ProtocolInfo.v1_14_0);
+            for (Player player : queue.get(index).values()) {
+                if (player.isConnected() && player.usedChunks.containsKey(index)) {
+                    player.sendChunk(x, z, packet);
+                }
+            }
+            queue.remove(index);
+            tasks389.remove(index);
         }
     }
 
@@ -2917,7 +2931,32 @@ public class Level implements ChunkManager, Metadatable {
             if (task != null) {
                 this.server.getScheduler().scheduleAsyncTask(task);
             }
+            this.timings.syncChunkSendPrepareTimer.stopTiming();
+        }
 
+
+        protocol = ProtocolInfo.v1_14_0;
+        for (long index : getChunkSendQueue(protocol).keySet()) {
+            LongSet tasks = getChunkSendTasks(protocol);
+            if (tasks.contains(index)) {
+                continue;
+            }
+            int x = getHashX(index);
+            int z = getHashZ(index);
+            tasks.add(index);
+            BaseFullChunk chunk = getChunk(x, z);
+            if (chunk != null) {
+                BatchPacket packet = chunk.getChunkPacket(protocol);
+                if (packet != null) {
+                    this.sendChunk(x, z, index, packet);
+                    continue;
+                }
+            }
+            this.timings.syncChunkSendPrepareTimer.startTiming();
+            AsyncTask task = this.provider.requestChunkTask(protocol, x, z);
+            if (task != null) {
+                this.server.getScheduler().scheduleAsyncTask(task);
+            }
             this.timings.syncChunkSendPrepareTimer.stopTiming();
         }
 
@@ -4003,9 +4042,14 @@ public class Level implements ChunkManager, Metadatable {
             return chunkSendQueue0;
         } else if (protocol == ProtocolInfo.v1_12_0) {
             return chunkSendQueue361;
-        } else {
+        } else if (protocol == ProtocolInfo.v1_13_0) {
             return chunkSendQueue388;
+        } else if (protocol == ProtocolInfo.v1_14_0 || protocol == ProtocolInfo.v1_14_60) {
+            return chunkSendQueue389;
+        } else {
+            throw new IllegalArgumentException("Missing chunk send queue for protocol " + protocol);
         }
+
     }
 
     private LongSet getChunkSendTasks(int protocol) {
@@ -4013,13 +4057,17 @@ public class Level implements ChunkManager, Metadatable {
             return chunkSendTasks0;
         } else if (protocol == ProtocolInfo.v1_12_0) {
             return chunkSendTasks361;
-        } else {
+        } else if (protocol == ProtocolInfo.v1_13_0) {
             return chunkSendTasks388;
+        } else if (protocol == ProtocolInfo.v1_14_0 || protocol == ProtocolInfo.v1_14_60) {
+            return chunkSendTasks389;
+        } else {
+            throw new IllegalArgumentException("Missing chunk send task for protocol " + protocol);
         }
     }
 
     private static boolean matchMVChunkProtocol(int chunk, int player) {
-        return (chunk == 0 && player < ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_12_0 && player == ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_13_0 && player >= ProtocolInfo.v1_13_0);
+        return (chunk == 0 && player < ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_12_0 && player == ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_13_0 && player == ProtocolInfo.v1_13_0) || (chunk == ProtocolInfo.v1_14_0 && (player == ProtocolInfo.v1_14_0 || player == ProtocolInfo.v1_14_60));
     }
 
     private static class CharacterHashMap extends HashMap<Character, Object> {
