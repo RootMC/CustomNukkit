@@ -492,28 +492,6 @@ public class Server {
         if (this.getPropertyBoolean("entity-auto-spawn-task", true)) {
             this.scheduler.scheduleDelayedRepeatingTask(new Spawner(), this.getPropertyInt("ticks-per-entity-spawns", 200), this.getPropertyInt("ticks-per-entity-spawns", 200));
         }
-
-        // Check for updates
-        this.scheduler.scheduleTask(null, () -> {
-            try {
-                URLConnection request = new URL("https://api.github.com/repos/PetteriM1/NukkitPetteriM1Edition/commits/master").openConnection();
-                request.connect();
-                InputStreamReader content = new InputStreamReader((InputStream) request.getContent());
-                String latest = "git-" + new JsonParser().parse(content).getAsJsonObject().get("sha").getAsString().substring(0, 7);
-                content.close();
-
-                if (!this.getNukkitVersion().equals(latest) && !this.getNukkitVersion().equals("git-null") && Nukkit.isMasterBranchBuild()) {
-                    this.getLogger().info("\u00A7c[Update] \u00A7eThere is a new build of Nukkit PetteriM1 Edition available! Current: " + this.getNukkitVersion() + " Latest: " + latest + "\nYou can download the latest build from https://github.com/PetteriM1/NukkitPetteriM1Edition/releases");
-                } else if (!Nukkit.isMasterBranchBuild()) {
-                    this.getLogger().warning("\u00A7eYou are running a dev build! Do not use in production!");
-                }
-
-                this.getLogger().debug("Update check done");
-            } catch (Exception ignore) {
-                this.getLogger().debug("Update check failed");
-            }
-        }, true);
-
         this.start();
     }
 
