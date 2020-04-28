@@ -2329,6 +2329,9 @@ public class Server {
         return redstoneEnabled;
     }
 
+    public boolean suomiCraftPEMode(){
+        return false; //fix for synapse
+    }
     /**
      * This class contains all default server.properties values.
      */
