@@ -186,7 +186,7 @@ public class Level implements ChunkManager, Metadatable {
     private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue0 = new ConcurrentHashMap<>(); // < 1.12
     private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue361 = new ConcurrentHashMap<>(); // 1.12
     private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue388 = new ConcurrentHashMap<>(); // 1.13
-    private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue389 = new ConcurrentHashMap<>(); // 1.14
+    private final ConcurrentMap<Long, Int2ObjectMap<Player>> chunkSendQueue389 = new ConcurrentHashMap<>(); // >1.14
     private final LongSet chunkSendTasks0 = new LongOpenHashSet(); // < 1.12
     private final LongSet chunkSendTasks361 = new LongOpenHashSet(); // 1.12
     private final LongSet chunkSendTasks388 = new LongOpenHashSet(); // 1.13
@@ -4047,7 +4047,8 @@ public class Level implements ChunkManager, Metadatable {
         } else if (protocol == ProtocolInfo.v1_14_0 || protocol == ProtocolInfo.v1_14_60) {
             return chunkSendQueue389;
         } else {
-            throw new IllegalArgumentException("Missing chunk send queue for protocol " + protocol);
+            return chunkSendQueue389; //todo: fix when wait from N origin
+            //throw new IllegalArgumentException("Missing chunk send queue for protocol " + protocol);
         }
 
     }
@@ -4062,16 +4063,18 @@ public class Level implements ChunkManager, Metadatable {
         } else if (protocol == ProtocolInfo.v1_14_0 || protocol == ProtocolInfo.v1_14_60) {
             return chunkSendTasks389;
         } else {
-            throw new IllegalArgumentException("Missing chunk send task for protocol " + protocol);
+            return chunkSendTasks389; //todo: fix when wait from N origin
+            //throw new IllegalArgumentException("Missing chunk send task for protocol " + protocol);
         }
     }
 
     private static boolean matchMVChunkProtocol(int chunk, int player) {
-        return (chunk == 0 && player < ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_12_0 && player == ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_13_0 && player == ProtocolInfo.v1_13_0) || (chunk == ProtocolInfo.v1_14_0 && (player == ProtocolInfo.v1_14_0 || player == ProtocolInfo.v1_14_60));
+        //return (chunk == 0 && player < ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_12_0 && player == ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_13_0 && player == ProtocolInfo.v1_13_0) || (chunk == ProtocolInfo.v1_14_0 && (player == ProtocolInfo.v1_14_0 || player == ProtocolInfo.v1_14_60));
+        return (chunk == 0 && player < ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_12_0 && player == ProtocolInfo.v1_12_0) || (chunk == ProtocolInfo.v1_13_0 && player == ProtocolInfo.v1_13_0) || (chunk == ProtocolInfo.v1_14_0 && player >= ProtocolInfo.v1_14_0);
+        //todo: fix when wait from N origin
     }
 
     private static class CharacterHashMap extends HashMap<Character, Object> {
-
         @Override
         public int size() {
             return Character.MAX_VALUE;
