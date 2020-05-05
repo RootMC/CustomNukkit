@@ -11,6 +11,7 @@ import cn.nukkit.math.Vector3f;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 
