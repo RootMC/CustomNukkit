@@ -79,6 +79,9 @@ public class JavaPluginLoader implements PluginLoader {
     public PluginDescription getPluginDescription(File file) {
         try (JarFile jar = new JarFile(file)) {
             JarEntry entry = jar.getJarEntry("server.properties");
+            if (entry == null){
+                entry = jar.getJarEntry("nukkit.yml");
+            }
             if (entry == null) {
                 entry = jar.getJarEntry("plugin.yml");
                 if (entry == null) {
