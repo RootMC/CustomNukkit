@@ -827,7 +827,7 @@ public abstract class Entity extends Location implements Metadatable {
         shortNames.put(clazz.getSimpleName(), name);
         return true;
     }
-    
+
     public static CompoundTag getDefaultNBT(Vector3 pos) {
         return getDefaultNBT(pos, null);
     }
@@ -1107,7 +1107,7 @@ public abstract class Entity extends Location implements Metadatable {
     public boolean isAlive() {
         return this.health > 0;
     }
-    
+
     public boolean isClosed() {
         return closed;
     }
@@ -1293,7 +1293,8 @@ public abstract class Entity extends Location implements Metadatable {
 
         if (this.y <= -16 && this.isAlive()) {
             if (this.isPlayer) {
-                if (((Player) this).getGamemode() != Player.CREATIVE) this.attack(new EntityDamageEvent(this, DamageCause.VOID, 10));
+                if (((Player) this).getGamemode() != Player.CREATIVE)
+                    this.attack(new EntityDamageEvent(this, DamageCause.VOID, 10));
             } else {
                 this.attack(new EntityDamageEvent(this, DamageCause.VOID, 10));
                 hasUpdate = true;
@@ -1361,7 +1362,7 @@ public abstract class Entity extends Location implements Metadatable {
             this.lastYaw = this.yaw;
             this.lastPitch = this.pitch;
 
-            this.addMovement(this.x, this.y, this.z, this.yaw, this.pitch, this.yaw);
+            this.addMovement(this.x, this.y + this.getBaseOffset(), this.z, this.yaw, this.pitch, this.yaw);
         }
 
         if (diffMotion > 0.0025 || (diffMotion > 0.0001 && this.getMotion().lengthSquared() <= 0.0001)) { //0.05 ** 2
@@ -1374,7 +1375,7 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
-        this.level.addEntityMovement(this, x, y + this.getBaseOffset(), z, yaw, pitch, headYaw);
+        this.level.addEntityMovement(this, x, y, z, yaw, pitch, headYaw);
     }
 
     public void addMotion(double motionX, double motionY, double motionZ) {
@@ -1565,7 +1566,8 @@ public abstract class Entity extends Location implements Metadatable {
     public void setAbsorption(float absorption) {
         if (absorption != this.absorption) {
             this.absorption = absorption;
-            if (this.isPlayer) ((Player) this).setAttribute(Attribute.getAttribute(Attribute.ABSORPTION).setValue(absorption));
+            if (this.isPlayer)
+                ((Player) this).setAttribute(Attribute.getAttribute(Attribute.ABSORPTION).setValue(absorption));
         }
     }
 
